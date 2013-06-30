@@ -1,0 +1,95 @@
+fun is_older ((y1, m1, d1), (y2, m2, d2)) = 
+    y1 * 1000 + m1 * 100 + d1 < y2 * 1000 + m2 * 100 + d2
+
+fun number_in_month (ds : (int * int * int) list, m) = 
+    if null ds
+    then 0
+    else if #2 (hd ds) = m
+         then 1 + number_in_month (tl ds, m)
+         else number_in_month (tl ds, m)
+
+fun number_in_months (ds, ms : int list) =
+    if null ms
+    then 0
+    else number_in_month (ds, hd ms) + number_in_months (ds, tl ms)
+
+fun dates_in_month (ds: (int * int * int) list, m : int) = 
+    if null ds
+    then []
+    else if #2 (hd ds) = m 
+         then hd ds::dates_in_month (tl ds, m)
+         else dates_in_month (tl ds, m)
+
+fun dates_in_months (ds, ms) = 
+    if null ms
+    then []
+    else dates_in_month (ds, hd ms) @ dates_in_months (ds, tl ms)
+
+fun get_nth (sl: string list, n) = 
+    if n = 1
+    then hd sl
+    else get_nth (tl sl, n-1)
+
+fun date_to_string (y, m, d) = 
+    let
+	val month_strings = ["January", "February", "March", "April", 
+			 "May", "June", "July", "August", 
+			 "September", "October", "November", "December"]
+    in
+	get_nth(month_strings, m) ^ " " ^ Int.toString(d) ^ ", " ^ Int.toString(y)
+    end
+
+fun number_before_reaching_sum (sum, ls) = 
+    if hd ls >=sum
+    then 0
+    else 1 + number_before_reaching_sum (sum - hd ls, tl ls)
+
+fun what_month (d) = 
+    let
+	val days_in_month_list = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    in
+	number_before_reaching_sum (d, days_in_month_list) + 1
+    end
+
+fun month_range (d1, d2) = 
+    if d1>d2
+    then []
+    else what_month(d1)::month_range(d1+1, d2)
+
+fun oldest (dates: (int * int * int) list) = 
+    if null dates
+    then NONE
+    else let fun non_empty_oldest (dates: (int * int * int) list) = 
+		 if null (tl dates)
+		 then hd dates
+		 else let val tl_ans = non_empty_oldest (tl dates)
+		      in if is_older (hd dates, tl_ans)
+			 then hd dates
+			 else tl_ans
+		      end
+	 in
+	     SOME (non_empty_oldest (dates))
+	 end
+
+fun rm_dup (ls: int list) = 
+    let fun in_list (ls: int list, x: int) = 
+	    if null ls
+	    then false
+	    else if hd ls = x
+	         then true
+	         else in_list (tl ls, x)
+	fun rm_loop (ls: int list, ans_list: int list) = 
+	    if null ls
+	    then ans_list
+	    else if in_list (ans_list, hd ls)
+	         then rm_loop (tl ls, ans_list)
+	         else rm_loop (tl ls, hd ls::ans_list)
+    in
+	rm_loop (ls, [])
+    end
+
+fun number_in_months_challenge (ds, ms) =
+    number_in_months (ds, rm_dup (ms))
+
+fun dates_in_months_challenge (ds, ms: int list) =
+    dates_in_months (ds, rm_dup (ms))
