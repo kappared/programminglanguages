@@ -4,8 +4,20 @@ val only_capitals =
     List.filter (fn s => Char.isUpper (String.sub (s, 0)))
 
 val longest_string1 = 
-    List.foldl ((fn (x, y) => if String.size x > String.size y then x else y), "")
+    List.foldl (fn (x, acc) => if String.size x > String.size acc then x else acc) ""
 
+val longest_string2 = 
+    List.foldl (fn (x, acc) => if String.size x >= String.size acc then x else acc) ""
+
+fun longest_string_helper f = 
+    List.foldl (fn (x, acc) => if f (String.size x, String.size acc) then x else acc) ""
+
+val longest_string3 = longest_string_helper (fn (x, acc) => x > acc)
+val longest_string4 = longest_string_helper (fn (x, acc) => x >= acc)
+
+val longest_capitalized = longest_string1 o only_capitals
+
+val rev_string = String.implode o List.rev o String.explode
 exception NoAnswer
 
 datatype pattern = Wildcard
